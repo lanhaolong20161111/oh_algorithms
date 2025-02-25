@@ -1,0 +1,36 @@
+class Solution:
+    def findShortestWay(self, maze:List[List[int]],ball:List[int],hole:List[int])->str:
+        INF=0x3f3f3f3f
+        dr=[1,0,0,-1]            #水平方向偏移量
+        dc=[0,-1,1,0]            #垂直方向偏移量
+        dirstr=["d","l","r","u"]    #方位：字典序最小
+        m,n=len(maze),len(maze[0])
+        qu=deque()      #定义队列，元素为[r,c]
+        dist=[[INF for _ in range(n)] for _ in range(m)]
+        path=[["" for _ in range(n)] for _ in range(m)]
+        dist[ball[0]][ball[1]]=0
+        qu.append([ball[0],ball[1]])
+        while qu:
+            [r,c]=qu.popleft()
+            for di in range(0,4):  				#从(r,c)扩展
+                nr,nc=r,c
+                delta=0
+                while nr+dr[di]>=0 and nr+dr[di]<m and \
+                    nc+dc[di]>=0 and nc+dc[di]<n and \
+                    maze[nr+dr[di]][nc+dc[di]]==0:  #一直滚下去
+                    nr,nc=nr+dr[di],nc+dc[di]       #按di方向滚到(nr,nc)
+                    delta+=1
+                    if nr==hole[0] and nc==hole[1]:
+                        break                  #找到洞时将其作为停靠点
+                curdist=dist[r][c]+delta
+                curpath=path[r][c]+dirstr[di]
+                if curdist<dist[nr][nc]:         #比较求最短路径
+                    dist[nr][nc]=curdist
+                    path[nr][nc]=curpath
+                    qu.append([nr,nc])
+                elif curdist==dist[nr][nc]:   #相同长度时
+                    if curpath<path[nr][nc]:
+                        path[nr][nc]=curpath
+                        qu.append([nr,nc])
+        if dist[hole[0]][hole[1]]==INF:return "impossible"
+        else:return path[hole[0]][hole[1]]
